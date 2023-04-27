@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<opencv_storage>
+
+  <exposure_auto>0</exposure_auto>
+  <exposure_time>5000</exposure_time> <!-- us -->
+<!--在亮度较强的情况下设置为700左右，同时提高gain值，提升间隔为3，设置为40；500,24-->
+
+  <w_auto>0</w_auto>
+  <w_red>1.98</w_red>
+  <w_green>1.0</w_green>
+  <w_blue>1.98</w_blue><!--2.5-->
+
+  <gain_auto>0</gain_auto>
+  <gain>15</gain>
+
+</opencv_storage>

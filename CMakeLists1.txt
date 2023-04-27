@@ -1,0 +1,37 @@
+cmake_minimum_required(VERSION 3.0.1)
+
+project(exe)#设置项目名称
+
+SET(CMAKE_CXX_STANDARD 14)
+SET(CMAKE_BUILD_TYPE Debug)
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DPATH=\"\\\"${PROJECT_SOURCE_DIR}\\\"\"")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D${CMAKE_SYSTEM_NAME}")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
+
+FIND_PACKAGE(OpenCV 4 REQUIRED)
+FIND_PACKAGE(Threads)
+FIND_PACKAGE(Eigen3 REQUIRED)
+
+INCLUDE_DIRECTORIES(
+    "include/autoaim"
+    "include/detector"
+    "include/digital_classifier"
+    "include/Imageprocess"
+    "include/mercure"
+    "include/pnp"
+    "include/predictor"
+    "include/serial"
+    ${OPENCV_INCLUDE_DIRECTORIES}
+	${Eigen_INCLUDE_DIRECTORIES}
+)
+
+add_subdirectory(
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/mercure
+)
+
+FILE(GLOB_RECURSE sourcefiles "src/*.cpp")
+
+add_executable(main ${sourcefiles})
+
+target_link_libraries(main mercure_driver ${OpenCV_LIBS})
