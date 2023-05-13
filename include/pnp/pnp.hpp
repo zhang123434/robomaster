@@ -6,7 +6,7 @@
 #include<opencv2/opencv.hpp>
 #include<vector>
 #include"../detector/detector.hpp"
-#include<opencv2/core.hpp>//使用cv2eigen函数的注意点？？？
+#include<opencv2/core.hpp>
 #include<mutex>
 using namespace cv;
 using namespace std;
@@ -38,26 +38,6 @@ inline cv::Point2f points_center(cv::Point2f pts[4]) {
 }
 
 struct Pnp_config{//单位是毫米
-    /*
-    PTZ_CAMERA_X - 相机与云台的 X 轴偏移(左负右正)
-    PTZ_CAMERA_Y - 相机与云台的 Y 轴偏移(“上负下正”,不是上正下负)
-    PTZ_CAMERA_Z - 相机与云台的 Z 轴偏移(前正后负)
-    云台与相机 相机作为参考点，这三个量常用于做相机和云台坐标系之间的坐标转换；
-    */
-    double ptz_camera_x=0.0;
-    double ptz_camera_y=0.0;
-    double ptz_camera_z=0.0;
-    /*
-    barrel_camera_offset_x- 相机与枪管的 X 轴偏移(左负右正)
-    barrel_camera_offset_y - 相机与枪管的 Y 轴偏移(上负下正)
-    相机与枪管 相机作为参考点，(一般情况为枪管在相机坐标系下的位置取负数)
-    */
-    float barrel_camera_offset_x=0.0;
-    float barrel_camera_offset_y=-44.7;//-97.44;
-    float barrel_camera_offset_z=27.36;
-    /*
-    pitch和yaw的偏移角度，用于修正角度,该参数需要调整？？？？pitch: +下 -上    yaw: 顺时针 +右 -左
-    */
     float offset_armor_pitch=-0.6;
     float offset_armor_yaw=2.65;
 };
@@ -67,26 +47,24 @@ public:
     Eigen::Matrix3f gy_c_R; //从陀螺仪坐标系到相机坐标系的旋转矩阵
     Eigen::Vector3f gy_c_t;//从陀螺仪坐标系到相机坐标系的平移矩阵,相机坐标系中陀螺仪的坐标
     Eigen::Matrix3f c_gy_R;//从相机坐标系到陀螺仪坐标的旋转矩阵；
-    //Mat cameraMatrix;//相机的内参矩阵；
-    //Mat distcoeffs;//相机的畸变矩阵
     cv::Mat cameraMatrix_Mat;
     cv::Mat distcoeffs_Mat;
     Pnp_config pnp_config;
     mutex pnp_mutex;
 
 //定义pnp结算中用到的一些特征点容器：单位是mm
-    float    small_armor_height  =63.0,  small_armor_width = 128;//130,62.0;
+    float    small_armor_height  =63.0,  small_armor_width = 128;
     float   big_armor_width     = 225, big_armor_height  = 65;
     std::vector<cv::Point3f> big_featurepoint;
     std::vector<cv::Point3f> small_featurepoint;
 
 //解算出来的数据：
     float yaw;//左右偏转的角度；
-    float pitch;//上下旋转的角度,这两个角度以度为单位；
-    float distance;//相机坐标中装甲板中心和该坐标系原点之间的距离，这个距离以m为单位；
-    Point3f pcamera_;
-    Mat tvec;
-    Mat rvec;
+    float pitch;//上下旋转的角度,这两个角度以度为单位
+    float distance;//相机坐标中装甲板中心和该坐标系原点之间的距离，这个距离以m为单位
+    Point3f pcamera_;//世界坐标系中装甲板的中心在相机坐标系中的坐标
+    Mat tvec;//相机坐标系到世界坐标系的平移矩阵
+    Mat rvec;//相机坐标系到世界坐标系的旋转矩阵
 //定义和pnp解算相关的函数：
     /**
      * @brief 相机坐标系内的坐标转换到"陀螺仪"的绝对"世界坐标系"中，陀螺仪中的坐标是可变的；
@@ -100,7 +78,6 @@ public:
         pcamera.z+=offset.z;
         Eigen::Quaterniond q1(q[0],q[1],q[2],q[3]);
         Eigen::Quaterniond p(0,pcamera.z,-pcamera.x,-pcamera.y);
-        //float l=q[0]*q[0]+q34.7582 59.9395 10[1]*q[1]+q[2]*q[2]+q[3]*q[3];
         Eigen::Quaterniond result=q1*p*q1.inverse();
         return Point3f(float(result.x()),float(result.y()),float(result.z()));
     }
@@ -146,11 +123,11 @@ public:
         cv::Mat t(pimage_);//可以直接将Point3f类型的数据转化为mat类型的数据；
         cv::projectPoints(p1,rvec,t,cameraMatrix_Mat,distcoeffs_Mat,p2);
         p_2d=p2[0];
-        /*vector<cv::Point3f> p1;
-        p1.push_back(pimage_);
-        vector<cv::Point2f> p2;
-        cv::projectPoints(p1,rvec,tvec,cameraMatrix_Mat,distcoeffs_Mat,p2);
-        p_2d=p2[0];*/
+        // vector<cv::Point3f> p1;
+        // p1.push_back(pimage_);
+        // vector<cv::Point2f> p2;
+        // cv::projectPoints(p1,rvec,tvec,cameraMatrix_Mat,distcoeffs_Mat,p2);
+        // p_2d=p2[0];
         cv::circle(image,p_2d,3,cv::Scalar(0,255,0),3); 
         //cout<<p_2d<<endl; 
         //putText(image,"",p_2d,FONT_HERSHEY_SIMPLEX,1,Scalar(0,255,0),2);
@@ -186,7 +163,6 @@ public:
             ru=t[3];
             rd=t[2];
         }
-//???为什么需要设置图片取样偏移量
         pimage[0]=lu;//+cv::Point2f(IMAGE_X_DIS, IMAGE_Y_DIS);
         pimage[1]=ru;//+cv::Point2f(IMAGE_X_DIS, IMAGE_Y_DIS);
         pimage[2]=rd;//+cv::Point2f(IMAGE_X_DIS, IMAGE_Y_DIS);
@@ -210,7 +186,6 @@ public:
             cv::solvePnP(big_featurepoint,pimage,cameraMatrix_Mat,distcoeffs_Mat,rvec,tvec,false,cv::SOLVEPNP_ITERATIVE);
         }
         distance=pow(tvec.at<double>(0,0)*tvec.at<double>(0,0)+tvec.at<double>(1,0)*tvec.at<double>(1,0)+tvec.at<double>(2,0)*tvec.at<double>(2,0),0.5)/1000.0;
-        //为什么这样：考虑枪管和云台的偏移量；
         pnp_mutex.lock();
         yaw=atan2(tvec.at<double>(0,0),(tvec.at<double>(2,0)))*180.0/CV_PI;//加10
         pitch=atan2(-(tvec.at<double>(1,0)),(tvec.at<double>(2,0)))*180.0/CV_PI+2.5;//加80.48,60,10
@@ -242,8 +217,8 @@ public:
                 small_armor_height * 0.5, 0));
         small_featurepoint.emplace_back(Point3f(-small_armor_width   * 0.5,
                 small_armor_height * 0.5, 0));
-    //注意yaml，yml文件中不能存储Matrix类型的元素
-//注意这里的相对目录一定不能用"../../parameter/camera_param.xml"
+        //注意yaml，yml文件中不能存储Matrix类型的元素
+        //注意这里的相对目录一定不能用"../../parameter/camera_param.xml"
         cv::FileStorage fs("../parameter/camera_param.xml",cv::FileStorage::READ);
         if (!fs.isOpened()){
             cout<<"load camera parameter failed"<<endl;

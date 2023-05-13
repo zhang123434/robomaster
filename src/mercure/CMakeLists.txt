@@ -1,6 +1,5 @@
 Cmake_minimum_required (VERSION 2.8)
 
-
 project(mercure_driver)
 
 message(STATUS "Configuring Sub_project:mercure_drive")

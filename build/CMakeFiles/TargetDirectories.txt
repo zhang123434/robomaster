@@ -1,6 +1,6 @@
-/home/nuc/Desktop/infantry_current_6.7/build/CMakeFiles/rebuild_cache.dir
-/home/nuc/Desktop/infantry_current_6.7/build/CMakeFiles/edit_cache.dir
-/home/nuc/Desktop/infantry_current_6.7/build/CMakeFiles/exe.dir
-/home/nuc/Desktop/infantry_current_6.7/build/src/mercure/CMakeFiles/rebuild_cache.dir
-/home/nuc/Desktop/infantry_current_6.7/build/src/mercure/CMakeFiles/edit_cache.dir
-/home/nuc/Desktop/infantry_current_6.7/build/src/mercure/CMakeFiles/mercure_driver.dir
+/media/zzh/Data/infantry_current_6.7/build/CMakeFiles/exe.dir
+/media/zzh/Data/infantry_current_6.7/build/CMakeFiles/edit_cache.dir
+/media/zzh/Data/infantry_current_6.7/build/CMakeFiles/rebuild_cache.dir
+/media/zzh/Data/infantry_current_6.7/build/src/mercure/CMakeFiles/mercure_driver.dir
+/media/zzh/Data/infantry_current_6.7/build/src/mercure/CMakeFiles/edit_cache.dir
+/media/zzh/Data/infantry_current_6.7/build/src/mercure/CMakeFiles/rebuild_cache.dir

@@ -1,5 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/mercure_driver.dir/mercure_driver.cpp.o"
+  "CMakeFiles/mercure_driver.dir/mercure_driver.cpp.o.d"
   "libmercure_driver.a"
   "libmercure_driver.pdb"
 )
